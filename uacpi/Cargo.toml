@@ -1,0 +1,10 @@
+[package]
+name = "uacpi"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+uacpi-sys = { path = "../uacpi-sys" }
+
+[features]
+reduced-hardware = ["uacpi-sys/reduced-hardware"]
