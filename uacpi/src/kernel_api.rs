@@ -11,6 +11,7 @@ use core::{
     alloc::Layout,
     ffi::{c_char, c_void},
 };
+use log::{debug, error, info, trace, warn};
 use printf_compat::{format, output};
 
 pub trait KernelApi {
@@ -22,6 +23,22 @@ pub trait KernelApi {
         dealloc(ptr, layout)
     }
 
+    #[cfg(feature = "logging")]
+    fn log(&self, log_level: LogLevel, string: &str) {
+        if log_level == LogLevel::TRACE {
+            trace!("{string}");
+        } else if log_level == LogLevel::DEBUG {
+            debug!("{string}");
+        } else if log_level == LogLevel::INFO {
+            info!("{string}");
+        } else if log_level == LogLevel::WARN {
+            warn!("{string}");
+        } else if log_level == LogLevel::ERROR {
+            error!("{string}");
+        }
+    }
+
+    #[cfg(not(feature = "logging"))]
     fn log(&self, log_level: LogLevel, string: &str);
 
     fn stall(&self, usec: u8);
