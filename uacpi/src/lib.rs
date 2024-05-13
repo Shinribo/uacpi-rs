@@ -4,7 +4,7 @@
 extern crate alloc;
 
 pub mod kernel_api;
-#[cfg(feature = "included_libc")]
+#[cfg(feature = "libc-impl")]
 mod libc_impl;
 pub mod types;
 
