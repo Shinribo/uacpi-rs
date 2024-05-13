@@ -195,7 +195,9 @@ pub(crate) unsafe extern "C" fn uacpi_kernel_calloc(count: usize, size: usize) -
 
 #[no_mangle]
 pub(crate) unsafe extern "C" fn uacpi_kernel_free(ptr: *mut c_void, size: usize) {
-    get_kernel_api().dealloc(ptr.cast(), Layout::from_size_align(size, 8).unwrap())
+    if !ptr.is_null() {
+        get_kernel_api().dealloc(ptr.cast(), Layout::from_size_align(size, 8).unwrap())
+    }
 }
 
 #[no_mangle]
