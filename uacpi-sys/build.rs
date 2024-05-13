@@ -62,6 +62,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             "-DUACPI_SIZED_FREES=1",
             #[cfg(feature = "reduced-hardware")]
             "-DUACPI_REDUCED_HARDWARE=1",
+            "-ffreestanding",
         ])
         .use_core()
         .generate()
