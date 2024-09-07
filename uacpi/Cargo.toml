@@ -6,10 +6,8 @@ edition = "2021"
 [dependencies]
 uacpi-sys = { path = "../uacpi-sys" }
 log = { version = "0.4", optional = true }
-printf-compat = { version = "0.1.1", default-features = false }
 
 [features]
-default = ["logging", "libc-impl"]
-libc-impl = []
+default = ["logging"]
 logging = ["log"]
 reduced-hardware = ["uacpi-sys/reduced-hardware"]

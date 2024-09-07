@@ -7,8 +7,8 @@ links = "uacpi"
 [dependencies]
 
 [build-dependencies]
-bindgen = "0.69.4"
-cc = "1.0.97"
+bindgen = "0.70.1"
+cc = "1.1.18"
 
 [features]
 reduced-hardware = []
