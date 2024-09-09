@@ -19,8 +19,18 @@ impl LogLevel {
 pub struct Handle(pub(crate) uacpi_sys::uacpi_handle);
 
 impl Handle {
+    /// Creates a new opaque kernel handle. Using 0 here is not allowed.
     pub fn new(handle: u64) -> Handle {
+        assert_ne!(
+            handle,
+            0,
+            "using 0 for success is not allowed, if you want an invalid handle use invalid() instead");
         Handle(handle as _)
+    }
+
+    /// Creates a new invalid kernel handle.
+    pub fn invalid() -> Handle {
+        Handle(0 as _)
     }
 
     pub fn as_u64(self) -> u64 {
