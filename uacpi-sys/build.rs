@@ -3,6 +3,7 @@ use std::{
     error::Error,
     path::{Path, PathBuf},
 };
+use std::process::Command;
 
 const SOURCES: &[&str] = &[
     "source/tables.c",
@@ -22,17 +23,31 @@ const SOURCES: &[&str] = &[
     "source/registers.c",
     "source/resources.c",
     "source/event.c",
+    "source/mutex.c",
+    "source/osi.c"
 ];
 
+fn init_submodule(uacpi_path: &Path) {
+    if !uacpi_path.join("README.md").exists() {
+        Command::new("git")
+            .args(["submodule", "update", "--init"])
+            .current_dir(uacpi_path)
+            .status()
+            .expect("failed to retrieve uACPI sources with git");
+    }
+}
+
 fn main() -> Result<(), Box<dyn Error>> {
-    let project_dir = std::env::var_os("CARGO_MANIFEST_DIR").unwrap();
+    let project_dir = env::var_os("CARGO_MANIFEST_DIR").unwrap();
     let uacpi_path = Path::new(&project_dir).join("vendor");
-    let uacpi_path_str = uacpi_path.to_string_lossy();
+
+    init_submodule(&uacpi_path);
+
+    let uacpi_path_str = uacpi_path.to_str().unwrap();
 
     let sources = SOURCES
         .iter()
-        .map(|file| format!("{uacpi_path_str}/{file}"))
-        .collect::<Vec<_>>();
+        .map(|file| format!("{uacpi_path_str}/{file}"));
 
     let mut cc = cc::Build::new();
 
@@ -40,13 +55,13 @@ fn main() -> Result<(), Box<dyn Error>> {
         .include(format!("{uacpi_path_str}/include"))
         .define("UACPI_SIZED_FREES", "1")
         .flag("-fno-stack-protector")
-        .flag("-mno-sse")
-        .flag("-mno-mmx")
-        .flag("-msoft-float")
-        .flag("-mno-red-zone")
-        .flag("-fno-builtin")
+        .flag("-mgeneral-regs-only")
         .flag("-nostdlib")
         .flag("-ffreestanding");
+
+    if cfg!(target_arch = "x86_64") || cfg!(target_arch = "x86") {
+        cc.flag("-mno-red-zone");
+    }
 
     if cfg!(feature = "reduced-hardware") {
         cc.define("UACPI_REDUCED_HARDWARE", "1");
@@ -64,6 +79,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             "-DUACPI_REDUCED_HARDWARE=1",
             "-ffreestanding",
         ])
+        .prepend_enum_name(false)
         .use_core()
         .generate()
         .expect("Unable to generate bindings");
